@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import string
 import os
+from tkinter import Tk, filedialog
 
 def detect_header(df):
     """Detect if the first row is a header or content."""
@@ -106,14 +107,22 @@ def main():
                     else:
                         st.warning("⚠️ No hay prefijos para revertir en esta columna.")
 
-            # Guardar archivo CSV en el mismo directorio del script sin encabezados personalizados
+            # Guardar archivo CSV preguntando dónde guardar
             st.header("💾 Guardar archivo")
-            if st.button("Guardar archivo CSV en el directorio del script"):
-                file_path = os.path.join(os.getcwd(), "archivo_modificado.csv")
-                # Restaurar los encabezados originales antes de guardar
-                st.session_state.modified_df.columns = original_headers[:len(st.session_state.modified_df.columns)]
-                st.session_state.modified_df.to_csv(file_path, index=False)
-                st.success(f"✅ Archivo CSV guardado en: {file_path}")
+            if st.button("Guardar archivo CSV"):
+                root = Tk()
+                root.withdraw()  # Ocultar ventana de Tkinter
+                root.attributes('-topmost', True)  # Asegurar que la ventana de diálogo esté al frente
+                file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+                root.destroy()
+
+                if file_path:
+                    # Restaurar los encabezados originales antes de guardar
+                    st.session_state.modified_df.columns = original_headers[:len(st.session_state.modified_df.columns)]
+                    st.session_state.modified_df.to_csv(file_path, index=False)
+                    st.success(f"✅ Archivo CSV guardado en: {file_path}")
+                else:
+                    st.warning("⚠️ Operación de guardado cancelada.")
 
         except Exception as e:
             st.error(f"❌ Error al procesar el archivo: {e}")
