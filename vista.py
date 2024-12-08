@@ -30,7 +30,7 @@ def main():
             if is_header:
                 st.success("✅ Se detectó que la primera fila es un encabezado y se utilizó como tal.")
             else:
-                st.warning("⚠️ La primera fila no parece ser un encabezado. Se usaron encabezados genéricos.")
+                st.warning("ℹ️ La primera fila no parece ser un encabezado. Se asignaron nombres genéricos a las columnas para ayudarte.")
                 df.columns = [f"Columna {i+1}" for i in range(df.shape[1])]
 
             # Crear encabezados al estilo Excel sin eliminar nombres originales
