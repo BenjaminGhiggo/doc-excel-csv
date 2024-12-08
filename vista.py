@@ -44,6 +44,7 @@ def main():
                 st.session_state.deleted_columns = []
                 st.session_state.prefixed_columns = {}
                 st.session_state.file_name = uploaded_file.name
+                st.session_state.is_header = is_header
 
             # Mostrar previsualización
             st.header("📋 Previsualización del archivo")
@@ -112,7 +113,10 @@ def main():
             # Guardar archivo CSV para descargar
             st.header("💾 Guardar archivo")
             output = BytesIO()
-            st.session_state.modified_df.to_csv(output, index=False)
+            if st.session_state.is_header:
+                st.session_state.modified_df.to_csv(output, index=False)
+            else:
+                st.session_state.modified_df.to_csv(output, index=False, header=False)
             output.seek(0)
 
             st.download_button(
@@ -135,6 +139,8 @@ def main():
             del st.session_state.prefixed_columns
         if 'file_name' in st.session_state:
             del st.session_state.file_name
+        if 'is_header' in st.session_state:
+            del st.session_state.is_header
 
 if __name__ == "__main__":
     main()
