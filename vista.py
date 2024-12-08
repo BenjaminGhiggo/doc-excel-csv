@@ -39,9 +39,11 @@ def main():
             df.columns = excel_headers
 
             # Variables para mantener cambios
-            st.session_state.modified_df = df.copy()
-            st.session_state.deleted_columns = []
-            st.session_state.prefixed_columns = {}
+            if 'modified_df' not in st.session_state or st.session_state.get('file_name') != uploaded_file.name:
+                st.session_state.modified_df = df.copy()
+                st.session_state.deleted_columns = []
+                st.session_state.prefixed_columns = {}
+                st.session_state.file_name = uploaded_file.name
 
             # Mostrar previsualización
             st.header("📋 Previsualización del archivo")
@@ -109,19 +111,16 @@ def main():
 
             # Guardar archivo CSV para descargar
             st.header("💾 Guardar archivo")
-            if st.button("Descargar archivo CSV"):
-                # Convertir DataFrame a CSV en memoria
-                output = BytesIO()
-                st.session_state.modified_df.to_csv(output, index=False)
-                output.seek(0)
+            output = BytesIO()
+            st.session_state.modified_df.to_csv(output, index=False)
+            output.seek(0)
 
-                # Descargar el archivo CSV
-                st.download_button(
-                    label="Descargar archivo modificado",
-                    data=output,
-                    file_name="archivo_modificado.csv",
-                    mime="text/csv"
-                )
+            st.download_button(
+                label="Descargar archivo modificado",
+                data=output,
+                file_name="archivo_modificado.csv",
+                mime="text/csv"
+            )
 
         except Exception as e:
             st.error(f"❌ Error al procesar el archivo: {e}")
@@ -134,6 +133,8 @@ def main():
             del st.session_state.deleted_columns
         if 'prefixed_columns' in st.session_state:
             del st.session_state.prefixed_columns
+        if 'file_name' in st.session_state:
+            del st.session_state.file_name
 
 if __name__ == "__main__":
     main()
