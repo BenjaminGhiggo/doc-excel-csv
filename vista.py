@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import string
 import os
-from tkinter import Tk, filedialog
+from io import BytesIO
 
 def detect_header(df):
     """Detect if the first row is a header or content."""
@@ -107,22 +107,21 @@ def main():
                     else:
                         st.warning("⚠️ No hay prefijos para revertir en esta columna.")
 
-            # Guardar archivo CSV preguntando dónde guardar
+            # Guardar archivo CSV para descargar
             st.header("💾 Guardar archivo")
-            if st.button("Guardar archivo CSV"):
-                root = Tk()
-                root.withdraw()  # Ocultar ventana de Tkinter
-                root.attributes('-topmost', True)  # Asegurar que la ventana de diálogo esté al frente
-                file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
-                root.destroy()
+            if st.button("Descargar archivo CSV"):
+                # Convertir DataFrame a CSV en memoria
+                output = BytesIO()
+                st.session_state.modified_df.to_csv(output, index=False)
+                output.seek(0)
 
-                if file_path:
-                    # Restaurar los encabezados originales antes de guardar
-                    st.session_state.modified_df.columns = original_headers[:len(st.session_state.modified_df.columns)]
-                    st.session_state.modified_df.to_csv(file_path, index=False)
-                    st.success(f"✅ Archivo CSV guardado en: {file_path}")
-                else:
-                    st.warning("⚠️ Operación de guardado cancelada.")
+                # Descargar el archivo CSV
+                st.download_button(
+                    label="Descargar archivo modificado",
+                    data=output,
+                    file_name="archivo_modificado.csv",
+                    mime="text/csv"
+                )
 
         except Exception as e:
             st.error(f"❌ Error al procesar el archivo: {e}")
