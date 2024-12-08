@@ -3,6 +3,15 @@ import pandas as pd
 import string
 import os
 
+def detect_header(df):
+    """Detect if the first row is a header or content."""
+    first_row = df.iloc[0]
+    is_header = all(isinstance(value, str) for value in first_row)
+    if is_header:
+        df.columns = first_row
+        df = df[1:].reset_index(drop=True)
+    return df, is_header
+
 def main():
     st.set_page_config(page_title="Gestión de Archivos Excel", layout="centered")
 
@@ -14,8 +23,14 @@ def main():
     if uploaded_file is not None:
         # Leer el archivo Excel
         try:
-            df = pd.read_excel(uploaded_file)
-            st.success("✅ Archivo cargado correctamente")
+            df = pd.read_excel(uploaded_file, header=None)
+            df, is_header = detect_header(df)
+
+            if is_header:
+                st.success("✅ Se detectó que la primera fila es un encabezado y se utilizó como tal.")
+            else:
+                st.warning("⚠️ La primera fila no parece ser un encabezado. Se usaron encabezados genéricos.")
+                df.columns = [f"Columna {i+1}" for i in range(df.shape[1])]
 
             # Crear encabezados al estilo Excel sin eliminar nombres originales
             original_headers = df.columns.tolist()
