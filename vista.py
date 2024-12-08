@@ -61,9 +61,11 @@ def main():
                     except Exception as e:
                         st.error(f"Error al quitar prefijo: {e}")
 
-            # Guardar archivo CSV en el mismo directorio del script
+            # Guardar archivo CSV en el mismo directorio del script sin encabezados personalizados
             if st.button("Guardar archivo CSV en el directorio del script"):
                 file_path = os.path.join(os.getcwd(), "archivo_modificado.csv")
+                # Restaurar los encabezados originales antes de guardar
+                st.session_state.modified_df.columns = original_headers[:len(st.session_state.modified_df.columns)]
                 st.session_state.modified_df.to_csv(file_path, index=False)
                 st.success(f"Archivo CSV guardado en: {file_path}")
 
